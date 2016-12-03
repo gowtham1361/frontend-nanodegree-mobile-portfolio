@@ -489,14 +489,32 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // Moves the sliding background pizzas based on scroll position
 
 
+// Moves the sliding background pizzas based on scroll position
+
+// declaring the items globally to reduce Dom access.
+var items;
+
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
-  scrollPos=(document.body.scrollTop / 1250);//keeps causing FSL
-                                             //caused single digit avg time per 10 frame
-  var phase = Math.sin(scrollPos + 5);//moved out of for loop
+
+  //var items = document.querySelectorAll('.mover');
+
+  // http://www.w3schools.com/js/js_performance.asp
+
+  var phases = [];
+
+  // Precalculate the phases to reduce activity in the loop
+  for (var x = 0; x < 5; x++) {
+    phases.push(Math.sin((document.body.scrollTop / 1250) + (x % 5)));
+  }
+
   for (var i = 0; i < items.length; i++) {
-    items[i].style.left = items[i].basicLeft + 100 * phase+ 'px';
+
+    //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    //console.log("phase", phase);
+    items[i].style.left = items[i].basicLeft + 100 * phases[i%5] + 'px';
+    //console.log(i%5);
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -507,27 +525,39 @@ function updatePositions() {
     var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
     logAverageFrame(timesToUpdatePosition);
   }
-  //requestAnimationFrame(updatePositions);
 }
 
 // runs updatePositions on scroll
+// https://developer.mozilla.org/en-US/docs/Web/Events/scroll
 window.addEventListener('scroll', updatePositions);
 
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {// this anonymous fn takes a lot of time to run 206 ms
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 20; i++) {
+
+  // Reduce activity in the loop, Cache the reference to the pizza div
+  // Use a more performant selector
+  var pizzaElem = document.getElementById("movingPizzas1");
+
+  // Reduce number of background pizzas because, only a small number is visible
+  // Reduce DOM size
+  for (var i = 0; i < 30; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
     elem.basicLeft = (i % cols) * s;
-    console.log(i,i%cols,(i % cols) * s);
+    //console.log(i,i%cols,(i % cols) * s);
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
-    document.querySelector("#movingPizzas1").appendChild(elem);
+    pizzaElem.appendChild(elem);
   }
- items = document.getElementsByClassName('mover');//tried moving out of the updateposition fn but items was undefined since the dom was not loaded .
-  requestAnimationFrame(updatePositions);//updatePositions();
+
+   //tried moving out of the updateposition fn but items was undefined since the dom was not loaded .
+  // updatePositions is called on every scroll, that's why reduce activity
+  // the mover elements stay always the same, that's why only access the DOM once
+  items = document.getElementsByClassName('mover');//added getElementsByClassName to improve dom acces time
+  // add comment to explain the optimization
+ updatePositions();
 });
