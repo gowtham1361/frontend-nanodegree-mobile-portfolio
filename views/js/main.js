@@ -459,7 +459,7 @@ var resizePizzas = function(size) {
 window.performance.mark("mark_start_generating"); // collect timing data
 
 // This for-loop actually creates and appends all of the pizzas when the page loads
-for (var i = 2; i < 20; i++) {//reduced the iterations to 10.
+for (var i = 2; i < 50; i++) {//reduced the iterations to 10.
   var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
@@ -525,9 +525,9 @@ function updatePositions() {
 
     //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
     //console.log("phase", phase);
-    items[i].style.left = items[i].basicLeft + 100 * phases[i%5] + 'px';
+    //items[i].style.left = items[i].basicLeft + 100 * phases[i%5] + 'px';
     //tried to use transform but pizzas not behving properly
-    //items[i].style.transform = 'translateX(' + items[i].basicLeft + (100 * phases[i%5])+ 'px)';
+    items[i].style.transform = 'translateX(' + (100 * phases[i%5])+ 'px)';
     //console.log(i%5);
   }
 
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {// this anonymous fn t
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     //the style width and height were redundant so moved to css file in .mover class
-    elem.basicLeft = (i % cols) * s;
+    elem.style.left = (i % cols) * s+"px";
     //console.log(i,i%cols,(i % cols) * s);
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     pizzaElem.appendChild(elem);
