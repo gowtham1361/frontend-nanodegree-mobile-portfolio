@@ -459,7 +459,7 @@ var resizePizzas = function(size) {
 window.performance.mark("mark_start_generating"); // collect timing data
 
 // This for-loop actually creates and appends all of the pizzas when the page loads
-for (var i = 2; i < 10; i++) {//reduced the iterations to 10.
+for (var i = 2; i < 20; i++) {//reduced the iterations to 10.
   var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
@@ -486,14 +486,20 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 
 // The following code for sliding background pizzas was pulled from Ilya's demo found at:
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
+
+//QUESTIONS  TO THE MENTOR !!!!!!!!!!!!
+/*TRIED MY BEST TO OPTIMISE BUT STILL 6OFPS CONSISTENT IS NOT POSSSIBLE.
+1.HOW TO USE TRANSLATEX() INSTEAD OF items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+2.HOW TO ELIMINATE FORCED SYNCHRONOUS LAYOUT DUE TO var scrollPos=window.scrollY; IT SHOW UP ALWAYS.
+3.HOW TO USE REQUEST ANIMATION FRAME FOR UPDATEPOSITIONS FN tried using but scripting time increases.
+4.HOW TO REDUCE THE SCRIPTING TIME OF THE SCRIPTING IT TAKES 562ms.
+*/
+
 // Moves the sliding background pizzas based on scroll position
 
-
-// Moves the sliding background pizzas based on scroll position
-
-// declaring the items globally to reduce Dom access.
+// declaring the items globally to reduce Dom access IN LOOP.
 var items;
-
+var length_items ;
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
@@ -505,15 +511,23 @@ function updatePositions() {
   var phases = [];
 
   // Precalculate the phases to reduce activity in the loop
-  for (var x = 0; x < 5; x++) {
-    phases.push(Math.sin((document.body.scrollTop / 1250) + (x % 5)));
+  //moved out to reduce dom access
+   var scrollPos=window.scrollY;// this code works but still causes FSL.
+  var x;
+  for ( x = 0; x < 5; x++) {
+    // tried using scrollY not working.
+    //phases.push(Math.sin((window.scrollTop / 1250) + (x % 5)));
+   phases.push(Math.sin((scrollPos / 1250) + (x % 5)));
   }
-
-  for (var i = 0; i < items.length; i++) {
+        var length_items = items.length;//moved out of loop to reduce loop complexity
+  var i;
+  for ( i = 0; i < length_items; i++) {
 
     //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
     //console.log("phase", phase);
     items[i].style.left = items[i].basicLeft + 100 * phases[i%5] + 'px';
+    //tried to use transform but pizzas not behving properly
+    //items[i].style.transform = 'translateX(' + items[i].basicLeft + (100 * phases[i%5])+ 'px)';
     //console.log(i%5);
   }
 
@@ -546,8 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {// this anonymous fn t
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
-    elem.style.height = "100px";
-    elem.style.width = "73.333px";
+    //the style width and height were redundant so moved to css file in .mover class
     elem.basicLeft = (i % cols) * s;
     //console.log(i,i%cols,(i % cols) * s);
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
@@ -558,6 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {// this anonymous fn t
   // updatePositions is called on every scroll, that's why reduce activity
   // the mover elements stay always the same, that's why only access the DOM once
   items = document.getElementsByClassName('mover');//added getElementsByClassName to improve dom acces time
-  // add comment to explain the optimization
+  var length_items = items.length;
+  // tried moving out to global but the dom content was not yet loaded ,so moved this line here to reduce effect of this in defacto loop,
  updatePositions();
 });
