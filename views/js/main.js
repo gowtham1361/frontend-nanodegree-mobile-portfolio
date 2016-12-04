@@ -459,8 +459,9 @@ var resizePizzas = function(size) {
 window.performance.mark("mark_start_generating"); // collect timing data
 
 // This for-loop actually creates and appends all of the pizzas when the page loads
-for (var i = 2; i < 50; i++) {//reduced the iterations to 10.
-  var pizzasDiv = document.getElementById("randomPizzas");
+//moved out to optimise loop perfomance
+var pizzasDiv = document.getElementById("randomPizzas");
+for (var i = 2; i < 50; i++) {//reduced the iterations to 50.
   pizzasDiv.appendChild(pizzaElementGenerator(i));
 }
 
@@ -503,32 +504,28 @@ var length_items ;
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
-
-  //var items = document.querySelectorAll('.mover');
-
-  // http://www.w3schools.com/js/js_performance.asp
-
   var phases = [];
 
   // Precalculate the phases to reduce activity in the loop
   //moved out to reduce dom access
-   var scrollPos=window.scrollY;// this code works but still causes FSL.
+
+  var scrollPos=document.body.scrollTop / 1250;// this code works but still causes FSL.
   var x;
   for ( x = 0; x < 5; x++) {
-    // tried using scrollY not working.
-    //phases.push(Math.sin((window.scrollTop / 1250) + (x % 5)));
-   phases.push(Math.sin((scrollPos / 1250) + (x % 5)));
+   phases.push(Math.sin((scrollPos ) + x));
   }
-        var length_items = items.length;//moved out of loop to reduce loop complexity
+
+  var length_items = items.length;//moved out of loop to reduce loop complexity
+
   var i;
   for ( i = 0; i < length_items; i++) {
 
     //var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
     //console.log("phase", phase);
     //items[i].style.left = items[i].basicLeft + 100 * phases[i%5] + 'px';
-    //tried to use transform but pizzas not behving properly
+    //used transform instead of .left
     items[i].style.transform = 'translateX(' + (100 * phases[i%5])+ 'px)';
-    //console.log(i%5);
+
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -561,8 +558,8 @@ document.addEventListener('DOMContentLoaded', function() {// this anonymous fn t
     elem.className = 'mover';
     elem.src = "images/pizza.png";
     //the style width and height were redundant so moved to css file in .mover class
-    elem.style.left = (i % cols) * s+"px";
-    //console.log(i,i%cols,(i % cols) * s);
+    elem.style.left = (i % cols) * s + "px";
+    //removed basic.left and used style.left to use translateX
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     pizzaElem.appendChild(elem);
   }

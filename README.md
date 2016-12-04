@@ -55,6 +55,10 @@ The portfolio was built on Twitter's <a href="http://getbootstrap.com/">Bootstra
 * <a href="http://getbootstrap.com/components/">Bootstrap's Components</a>
 
 
+RUNNING INSTRUCTIONS:
+*open the index.html in your browser
+*then click the various links on the project portfolio site.
+
 changes made for website optimizations:
 
 * compressed the images to be displayed on the index.html and placed it in img/optimizedImages in the repository
@@ -62,3 +66,12 @@ changes made for website optimizations:
 *removed the  inline script for google analytics and the googlefont stylesheet.
 *added async attributes to the js files.
 
+optimizations made on main.js in views/js/main.js:
+
+*removed the complex calculation of px to percentage in function changePizzaSizes(size)
+*made many optimisations in for loops , moved some repeated declarations outside the loop
+* Precalculate the phases to reduce activity in the loop in line 514
+*used transform :translateX(),instead of items[i].style.left = items[i].basicLeft + 100 * phases[i%5] + 'px';
+*Reduce number of background pizzas because, only a small number is visible in line 556.
+*the style width and height were redundant so moved to css file in .mover class in style.css file.
+*moved some DOM accessing statements out of the updatepositions defacto loop function.
